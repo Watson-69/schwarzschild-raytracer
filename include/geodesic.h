@@ -6,17 +6,28 @@
 
 namespace bh {
 
-// Result of tracing a single ray.
+/// Outcome of a single ray trace.
 struct TraceResult {
+    /// Classification of the ray's fate.
     enum class Kind { HitHorizon, Escaped, HitDisk } kind = Kind::Escaped;
-    Vec3 finalDir{};        // direction used to sample background (if escaped)
-    double diskRadius = 0.0; // r where disk was hit (if HitDisk)
-    double redshift = 1.0;   // gravitational redshift factor at hit
+    /// Asymptotic direction at escape (world space, unit vector).
+    Vec3 finalDir{};
+    /// Radial coordinate where disk was hit (if HitDisk).
+    double diskRadius = 0.0;
+    /// Gravitational redshift factor at hit (observed/emitted frequency).
+    double redshift = 1.0;
+    /// Number of RK4 steps taken.
     int steps = 0;
 };
 
-// Trace a ray from (r0, theta0, phi0) with initial unit direction `dir`
-// in the local orthonormal frame of the camera. Mass is taken from config.
+/// Trace a null geodesic from a camera position.
+/// @param r0       Initial radial coordinate (M units).
+/// @param theta0   Initial polar angle (radians).
+/// @param phi0     Initial azimuthal angle (radians).
+/// @param dir      Unit direction in the camera's local orthonormal frame
+///                 (n_r, n_theta, n_phi). n_r points outward.
+/// @return TraceResult with kind, final direction, disk hit info, and step count.
+/// Uses MASS from config.h as the black hole mass.
 TraceResult traceRay(double r0, double theta0, double phi0, const Vec3& dir) noexcept;
 
 } // namespace bh
