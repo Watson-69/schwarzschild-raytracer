@@ -19,7 +19,7 @@ FetchContent_MakeAvailable(glm)
 find_package(OpenGL REQUIRED)
 
 # Core library: math + geodesic physics (no graphics deps)
-add_library(bh_core STATIC src/geodesic.cpp)
+add_library(bh_core STATIC src/geodesic.cpp src/image_io.cpp)
 target_include_directories(bh_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(bh_core PUBLIC cxx_std_17)
 
@@ -47,6 +47,9 @@ target_link_libraries(bench_cpu PRIVATE bh_core)
 # Tests
 enable_testing()
 add_executable(bh_test tests/test_geodesic.cpp)
+add_executable(test_metrics tests/test_metrics.cpp)
+target_link_libraries(test_metrics PRIVATE bh_core)
+add_test(NAME metrics COMMAND test_metrics)
 target_link_libraries(bh_test PRIVATE bh_core)
 add_test(NAME geodesic COMMAND bh_test)
 
