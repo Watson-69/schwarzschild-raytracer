@@ -32,6 +32,14 @@ add_executable(blackhole src/main.cpp src/render.cpp src/gl_loader.cpp)
 target_include_directories(blackhole PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(blackhole PRIVATE glfw glm::glm OpenGL::GL)
 
+# Copy shaders to build directory for runtime loading
+file(GLOB SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.glsl")
+add_custom_command(TARGET blackhole POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:blackhole>/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADERS} $<TARGET_FILE_DIR:blackhole>/shaders
+    COMMENT "Copying shaders to build directory"
+)
+
 # Tests
 enable_testing()
 add_executable(bh_test tests/test_geodesic.cpp)
