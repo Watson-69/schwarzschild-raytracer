@@ -42,6 +42,13 @@ cmake --build . --config Release
 
 Mouse: drag to orbit, scroll to zoom.
 
+## Benchmark
+
+`sh
+cmake --build --preset release --target bench_cpu
+./bench_cpu
+`
+
 ## Build & run without CMake (CPU only)
 
 ```powershell
