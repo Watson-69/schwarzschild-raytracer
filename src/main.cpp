@@ -2,9 +2,9 @@
 #include "config.h"
 #include "render.h"
 #include "gl_loader.h"
+#include "camera.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <cmath>
 #include <string>
 
 using namespace bh;
@@ -13,7 +13,7 @@ static Camera gCam;
 static bool gDragging = false;
 static double gLastX = 0, gLastY = 0;
 
-static void mouseButtonCallback(GLFWwindow* w, int button, int action, int /*mods*/) {
+static void mouseButtonCallback(GLFWwindow* w, int button, int action, int) {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
             gDragging = true;
@@ -24,31 +24,21 @@ static void mouseButtonCallback(GLFWwindow* w, int button, int action, int /*mod
     }
 }
 
-static void cursorPosCallback(GLFWwindow* /*w*/, double x, double y) {
+static void cursorPosCallback(GLFWwindow*, double x, double y) {
     if (gDragging) {
         double dx = x - gLastX;
         double dy = y - gLastY;
-        gCam.phi -= dx * MOUSE_SENSITIVITY;
-        gCam.theta -= dy * MOUSE_SENSITIVITY;
-        // clamp theta away from poles
-        if (gCam.theta < CAMERA_THETA_MIN) gCam.theta = CAMERA_THETA_MIN;
-        if (gCam.theta > CAMERA_THETA_MAX) gCam.theta = CAMERA_THETA_MAX;
-        gLastX = x;
-        gLastY = y;
+        gCam.orbit(dx, dy);
+        gLastX = x; gLastY = y;
     }
 }
 
-static void scrollCallback(GLFWwindow* /*w*/, double /*x*/, double y) {
-    gCam.r -= y * ZOOM_SPEED;
-    if (gCam.r < CAMERA_R_MIN) gCam.r = CAMERA_R_MIN;
-    if (gCam.r > CAMERA_R_MAX) gCam.r = CAMERA_R_MAX;
+static void scrollCallback(GLFWwindow*, double, double y) {
+    gCam.zoom(y);
 }
 
 int main() {
-    if (!glfwInit()) {
-        std::cerr << "Failed to init GLFW\n";
-        return -1;
-    }
+    if (!glfwInit()) { std::cerr << "Failed to init GLFW\n"; return -1; }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -57,24 +47,14 @@ int main() {
 #endif
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Black Hole", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Failed to create window\n";
-        glfwTerminate();
-        return -1;
-    }
+    if (!window) { std::cerr << "Failed to create window\n"; glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    if (!loadGL()) {
-        std::cerr << "Failed to load GL functions\n";
-        return -1;
-    }
+    if (!loadGL()) { std::cerr << "Failed to load GL functions\n"; return -1; }
 
     Renderer renderer;
-    if (!renderer.init()) {
-        std::cerr << "Failed to init renderer\n";
-        return -1;
-    }
+    if (!renderer.init()) { std::cerr << "Failed to init renderer\n"; return -1; }
 
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
@@ -86,13 +66,11 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         double now = glfwGetTime();
-        frames++;
+        ++frames;
         if (now - fpsTimer >= 0.5) {
             double fps = frames / (now - fpsTimer);
-            std::string title = "Black Hole - " + std::to_string((int)fps) + " FPS";
-            glfwSetWindowTitle(window, title.c_str());
-            frames = 0;
-            fpsTimer = now;
+            glfwSetWindowTitle(window, ("Black Hole - " + std::to_string((int)fps) + " FPS").c_str());
+            frames = 0; fpsTimer = now;
         }
 
         renderer.render(gCam, now);
