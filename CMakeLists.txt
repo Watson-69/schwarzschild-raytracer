@@ -42,6 +42,8 @@ add_custom_command(TARGET blackhole POST_BUILD
 
 # Benchmark
 add_executable(bench_cpu src/bench_cpu.cpp)
+add_executable(benchmark src/benchmark.cpp)
+target_link_libraries(benchmark PRIVATE bh_core)
 target_link_libraries(bench_cpu PRIVATE bh_core)
 
 # Tests
