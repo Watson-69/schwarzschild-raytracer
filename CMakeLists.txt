@@ -40,6 +40,10 @@ add_custom_command(TARGET blackhole POST_BUILD
     COMMENT "Copying shaders to build directory"
 )
 
+# Benchmark
+add_executable(bench_cpu src/bench_cpu.cpp)
+target_link_libraries(bench_cpu PRIVATE bh_core)
+
 # Tests
 enable_testing()
 add_executable(bh_test tests/test_geodesic.cpp)
