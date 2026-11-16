@@ -1,0 +1,7 @@
+build/
+output.ppm
+output.png
+*.exe
+.vs/
+.idea/
+*.user
